@@ -1,16 +1,29 @@
 version: 0.2
-
+env:
+  variables:
+    #
+    # NOTE: You need to replace these values!
+    #
+    ACCOUNT_NUMBER: "856777607988"
+    ECR_REGION: "ap-southeast-1"
+    ECR_REPOSITORY_NAME: "devops-workshop-app"
 phases:
   pre_build:
     commands:
+      # - echo Logging in to Amazon ECR...
+      # - aws --version
+      # - AWS_DEFAULT_REGION = ap-southeast-1
+      # - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      # - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      # - REPOSITORY_URI=687152471527.dkr.ecr.{$AWS_DEFAULT_REGION}.amazonaws.com/devops-workshop-app
+      # - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      # - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
       - echo Logging in to Amazon ECR...
       - aws --version
-      - AWS_DEFAULT_REGION = ap-southeast-1
-      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - REPOSITORY_URI=687152471527.dkr.ecr.{$AWS_DEFAULT_REGION}.amazonaws.com/devops-workshop-app
+      - $(aws ecr get-login --region $ECR_REGION --no-include-email)
+      - REPOSITORY_URI=$ACCOUNT_NUMBER.dkr.ecr.$ECR_REGION.amazonaws.com/$ECR_REPOSITORY_NAME
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
     commands:
       - echo Build started on `date`
